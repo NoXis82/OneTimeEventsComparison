@@ -29,11 +29,15 @@ class LoginViewModel() : ViewModel() {
     fun login() {
         viewModelScope.launch {
             state = state.copy(isLoading = true)
-            delay(3000L)
+            println("State: ${state.isLoading}")
 
-            navigationChannel.send(NavigationEvent.NavigateToProfile)
+            delay(3000)
+
+//            navigationChannel.send(NavigationEvent.NavigateToProfile)
 
             state = state.copy(isLoading = false)
+            println("State: ${state.isLoading}")
+
         }
     }
 
