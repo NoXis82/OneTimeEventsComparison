@@ -13,9 +13,6 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -27,6 +24,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.onetimeeventscomparison.ui.theme.OneTimeEventsComparisonTheme
+import kotlinx.coroutines.flow.Flow
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -40,18 +38,13 @@ class MainActivity : ComponentActivity() {
                         val viewModel = viewModel<LoginViewModel>()
                         val state = viewModel.state
 
-                    val lifecycleOwner = LocalLifecycleOwner.current
-                    LaunchedEffect(lifecycleOwner) {
-                        lifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                            viewModel.navigationEventChannelFlow.collect { event ->
-                                when(event) {
-                                    is NavigationEvent.NavigateToProfile -> {
-                                        navController.navigate("profile")
-                                    }
+                        ObserverAsEvent(flow = viewModel.navigationEventChannelFlow) { event ->
+                            when (event) {
+                                is NavigationEvent.NavigateToProfile -> {
+                                    navController.navigate("profile")
                                 }
                             }
                         }
-                    }
 
                         LoginScreen(
                             state = state,
@@ -65,8 +58,16 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
+}
 
-
+@Composable
+private fun <T> ObserverAsEvent(flow: Flow<T>, onEvent: (T) -> Unit) {
+    val lifecycleOwner = LocalLifecycleOwner.current
+    LaunchedEffect(lifecycleOwner) {
+        lifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+            flow.collect(onEvent)
+        }
+    }
 }
 
 @Composable
@@ -82,7 +83,9 @@ private fun LoginScreen(state: LoginState, onLoginClick: () -> Unit) {
                 Text(text = "Login")
             }
 
-            if (state.isLoading) { CircularProgressIndicator() }
+            if (state.isLoading) {
+                CircularProgressIndicator()
+            }
         }
     }
 }
