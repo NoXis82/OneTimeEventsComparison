@@ -12,12 +12,16 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -35,6 +39,19 @@ class MainActivity : ComponentActivity() {
                     composable("login") {
                         val viewModel = viewModel<LoginViewModel>()
                         val state = viewModel.state
+
+                    val lifecycleOwner = LocalLifecycleOwner.current
+                    LaunchedEffect(lifecycleOwner) {
+                        lifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                            viewModel.navigationEventChannelFlow.collect { event ->
+                                when(event) {
+                                    is NavigationEvent.NavigateToProfile -> {
+                                        navController.navigate("profile")
+                                    }
+                                }
+                            }
+                        }
+                    }
 
                         LoginScreen(
                             state = state,

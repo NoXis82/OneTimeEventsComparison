@@ -33,7 +33,7 @@ class LoginViewModel() : ViewModel() {
 
             delay(3000)
 
-//            navigationChannel.send(NavigationEvent.NavigateToProfile)
+            navigationChannel.send(NavigationEvent.NavigateToProfile)
 
             state = state.copy(isLoading = false)
             println("State: ${state.isLoading}")
