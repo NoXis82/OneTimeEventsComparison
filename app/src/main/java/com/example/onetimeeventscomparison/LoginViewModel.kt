@@ -30,11 +30,20 @@ class LoginViewModel() : ViewModel() {
     private val _navigationEvent = MutableSharedFlow<NavigationEvent>(replay = 3)
     val navigationEventSharedFlow = _navigationEvent.asSharedFlow()
 
+    /**
+     * Но эти API не гарантируют доставку и обработку этих событий
+     */
+
     var isLoggedIn by mutableStateOf(false)
         private set
 
     var state by mutableStateOf(LoginState())
         private set
+
+    //Получается костыль чтобы работал back stack в naviagtion
+    fun onNavigatedToLogin() {
+        state = state.copy(isLoggedIn = false)
+    }
 
     fun login() {
         viewModelScope.launch {
@@ -47,9 +56,10 @@ class LoginViewModel() : ViewModel() {
 //            navigationChannel.send(NavigationEvent.NavigateToProfile)
 
             //SharedFlow
-            _navigationEvent.emit(NavigationEvent.NavigateToProfile)
+//            _navigationEvent.emit(NavigationEvent.NavigateToProfile)
 
-            state = state.copy(isLoading = false)
+            //Не будет работать back stack для экранов
+            state = state.copy(isLoading = false, isLoggedIn = true)
             println("State: ${state.isLoading}")
 
         }
