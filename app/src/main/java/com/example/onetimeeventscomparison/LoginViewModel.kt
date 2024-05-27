@@ -47,22 +47,29 @@ class LoginViewModel() : ViewModel() {
 
     fun login() {
         viewModelScope.launch {
-            state = state.copy(isLoading = true)
-            println("State: ${state.isLoading}")
-
-            delay(3000)
-
-            //Channel
-//            navigationChannel.send(NavigationEvent.NavigateToProfile)
-
-            //SharedFlow
-//            _navigationEvent.emit(NavigationEvent.NavigateToProfile)
-
-            //Не будет работать back stack для экранов
-            state = state.copy(isLoading = false, isLoggedIn = true)
-            println("State: ${state.isLoading}")
-
+            repeat(1000) {
+                delay(3)
+                navigationChannel.send(NavigationEvent.CountEvent(it))
+            }
         }
+
+//        viewModelScope.launch {
+//            state = state.copy(isLoading = true)
+//            println("State: ${state.isLoading}")
+//
+//            delay(3000)
+//
+//            //Channel
+////            navigationChannel.send(NavigationEvent.NavigateToProfile)
+//
+//            //SharedFlow
+////            _navigationEvent.emit(NavigationEvent.NavigateToProfile)
+//
+//            //Не будет работать back stack для экранов
+//            state = state.copy(isLoading = false, isLoggedIn = true)
+//            println("State: ${state.isLoading}")
+//
+//        }
     }
 
 
@@ -70,6 +77,7 @@ class LoginViewModel() : ViewModel() {
 
 sealed interface NavigationEvent {
     data object NavigateToProfile : NavigationEvent
+    data class CountEvent(val count: Int) : NavigationEvent
 }
 
 data class LoginState(

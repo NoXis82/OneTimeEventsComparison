@@ -38,20 +38,31 @@ class MainActivity : ComponentActivity() {
                         val viewModel = viewModel<LoginViewModel>()
                         val state = viewModel.state
 
-                        LaunchedEffect(state.isLoggedIn) {
-                            if (state.isLoggedIn) {
-                                navController.navigate("profile")
-                                viewModel.onNavigatedToLogin()//Костыль
-                            }
-                        }
-
-//                        ObserverAsEvent(flow = viewModel.navigationEventSharedFlow) { event ->
-//                            when (event) {
-//                                is NavigationEvent.NavigateToProfile -> {
-//                                    navController.navigate("profile")
-//                                }
+//                        LaunchedEffect(state.isLoggedIn) {
+//                            if (state.isLoggedIn) {
+//                                navController.navigate("profile")
+//                                viewModel.onNavigatedToLogin()//Костыль
 //                            }
 //                        }
+
+                        ObserverAsEvent(flow = viewModel.navigationEventChannelFlow) { event ->
+                            when (event) {
+                                is NavigationEvent.NavigateToProfile -> {
+                                    navController.navigate("profile")
+                                }
+
+                                is NavigationEvent.CountEvent -> {
+                                    println("COUNT: ${event.count}")
+
+                                    /**
+                                     * 2024-05-27 17:37:42.385 26171-26171 System.out              com.example.onetimeeventscomparison  I  COUNT: 453
+                                     * 2024-05-27 17:37:42.422 26171-26171 System.out              com.example.onetimeeventscomparison  I  COUNT INTERRUPT
+                                     * 2024-05-27 17:37:42.565 26171-26171 System.out              com.example.onetimeeventscomparison  I  COUNT: 455
+                                     */
+
+                                }
+                            }
+                        }
 
                         LoginScreen(
                             state = state,
@@ -64,6 +75,11 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        println("COUNT INTERRUPT")
     }
 }
 
