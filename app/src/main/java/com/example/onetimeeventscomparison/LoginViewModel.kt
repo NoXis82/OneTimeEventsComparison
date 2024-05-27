@@ -14,10 +14,20 @@ import kotlinx.coroutines.launch
 
 class LoginViewModel() : ViewModel() {
 
+    /**
+     * Channel фактически имеют буфер (он может продолжить работу как только снова получит подписчика)
+     * Channel предназначены для одного подписчика
+     */
+
     private val navigationChannel = Channel<NavigationEvent>()
     val navigationEventChannelFlow = navigationChannel.receiveAsFlow()
 
-    private val _navigationEvent = MutableSharedFlow<NavigationEvent>()
+    /**
+     * SharedFlow по умолчанию не имеют буфера, но его можно условно задать с помощью например replay
+     * иначе при сворачивании приложения мы теряем состояние
+     * SharedFlow могут иметь несколько подписчиков
+     */
+    private val _navigationEvent = MutableSharedFlow<NavigationEvent>(replay = 3)
     val navigationEventSharedFlow = _navigationEvent.asSharedFlow()
 
     var isLoggedIn by mutableStateOf(false)
@@ -33,7 +43,11 @@ class LoginViewModel() : ViewModel() {
 
             delay(3000)
 
-            navigationChannel.send(NavigationEvent.NavigateToProfile)
+            //Channel
+//            navigationChannel.send(NavigationEvent.NavigateToProfile)
+
+            //SharedFlow
+            _navigationEvent.emit(NavigationEvent.NavigateToProfile)
 
             state = state.copy(isLoading = false)
             println("State: ${state.isLoading}")

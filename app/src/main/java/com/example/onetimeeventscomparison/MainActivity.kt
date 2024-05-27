@@ -38,7 +38,7 @@ class MainActivity : ComponentActivity() {
                         val viewModel = viewModel<LoginViewModel>()
                         val state = viewModel.state
 
-                        ObserverAsEvent(flow = viewModel.navigationEventChannelFlow) { event ->
+                        ObserverAsEvent(flow = viewModel.navigationEventSharedFlow) { event ->
                             when (event) {
                                 is NavigationEvent.NavigateToProfile -> {
                                     navController.navigate("profile")
