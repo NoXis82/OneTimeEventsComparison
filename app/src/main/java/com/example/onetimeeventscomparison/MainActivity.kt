@@ -24,7 +24,9 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.onetimeeventscomparison.ui.theme.OneTimeEventsComparisonTheme
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.withContext
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -88,7 +90,9 @@ private fun <T> ObserverAsEvent(flow: Flow<T>, onEvent: (T) -> Unit) {
     val lifecycleOwner = LocalLifecycleOwner.current
     LaunchedEffect(lifecycleOwner) {
         lifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-            flow.collect(onEvent)
+            withContext(Dispatchers.Main.immediate) {
+                flow.collect(onEvent)
+            }
         }
     }
 }
